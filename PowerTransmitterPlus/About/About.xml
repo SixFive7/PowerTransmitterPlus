@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ModMetadata xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+  <Name>Power Transmitter Plus [StationeersLaunchPad]</Name>
+  <ModID>net.powertransmitterplus</ModID>
+  <Author>SixFive7</Author>
+  <Version>1.0.0</Version>
+  <Description>[h1]Power Transmitter Plus[/h1]
+
+Part of the [b]Stationeers Plus[/b] mod collection.
+
+Enhances the Microwave Power Transmitter / Receiver pair with a visible beam between dishes whenever the link is active, aligned, and powered. The beam endpoints match the game's own raycast anchors, so the line lands exactly where power is flowing, and multiple transmitter/receiver pairs are handled independently.
+
+[h2]How it works[/h2]
+The mod piggybacks on the game's own VisualizerIntensity signal, so the beam inherits all of the game's gating logic (link established, dishes aligned, power flowing) and fades with the real power level. There is no per-tick scanning — beam state changes only when the game itself changes state.
+
+[h2]Settings[/h2]
+[list]
+[*][b]Beam Width[/b] — thickness in world units (default 0.1, matches vanilla)
+[*][b]Beam Color[/b] — hex RGB (default 000DFF, the cyan-blue the game itself applies at runtime)
+[*][b]Emission Intensity[/b] — HDR brightness multiplier (default 10.0, matches vanilla)
+[*][b]Shader Name[/b] — Unity shader used for the beam (default additive for a laser glow)
+[/list]
+
+[h2]Compatibility[/h2]
+[b]Requires:[/b] BepInEx + StationeersLaunchPad
+
+Visuals-only — safe to run with different versions between host and clients.</Description>
+  <ChangeLog>
+v1.0.0: Initial release
+- Draws a laser beam between linked microwave transmitter and receiver dishes
+- Event-driven: beam appears/disappears tracking the game's VisualizerIntensity
+- Endpoints refresh when the dish rotates
+- Independent beam per transmitter — multiple simultaneous links all render
+  </ChangeLog>
+  <Tags>
+    <Tag>BepInEx</Tag>
+    <Tag>StationeersLaunchPad</Tag>
+    <Tag>visual</Tag>
+    <Tag>power</Tag>
+    <Tag>StationeersPlus</Tag>
+  </Tags>
+  <InGameDescription><![CDATA[<size="30"><color=#00aaff>Power Transmitter Plus</color></size>
+Part of the <b>Stationeers Plus</b> mod collection.
+
+Draws a visible laser beam between aligned, linked, and powered microwave dishes.
+
+<b>Features:</b>
+- Beam only shows when the link is active and power is flowing
+- Multiple transmitter/receiver pairs handled independently
+- Configurable beam width, color, emission, and shader
+
+<b>Requirements:</b> BepInEx + StationeersLaunchPad
+]]></InGameDescription>
+</ModMetadata>
