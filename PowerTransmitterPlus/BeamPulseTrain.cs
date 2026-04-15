@@ -13,7 +13,6 @@ namespace PowerTransmitterPlus
         private LineRenderer _lr;
         private Material _instanceMaterial;
         private float _intensity;
-        private float _nextDiagLog;
 
         private void Awake()
         {
@@ -29,11 +28,6 @@ namespace PowerTransmitterPlus
             // can set tiling/offset without re-reading (which would re-clone).
             _instanceMaterial = _lr.material;
             _instanceMaterial.mainTexture = BeamManager.StripeTexture;
-
-            PowerTransmitterPlusPlugin.Log?.LogInfo(
-                $"[diag] BeamPulseTrain Awake shader={_instanceMaterial.shader?.name} " +
-                $"hasMainTex={_instanceMaterial.HasProperty("_MainTex")} " +
-                $"tex={(_instanceMaterial.mainTexture != null ? _instanceMaterial.mainTexture.name : "null")}");
         }
 
         internal void SetIntensity(float intensity)
@@ -66,16 +60,6 @@ namespace PowerTransmitterPlus
 
             _instanceMaterial.mainTextureScale = new Vector2(tiles, 1f);
             _instanceMaterial.mainTextureOffset = new Vector2(offset, 0f);
-
-            // Throttled diagnostic — once every 2s per instance — so we can
-            // see real intensity / scroll values without spamming the log.
-            if (Time.time >= _nextDiagLog)
-            {
-                _nextDiagLog = Time.time + 2f;
-                PowerTransmitterPlusPlugin.Log?.LogInfo(
-                    $"[diag] pulse intensity={_intensity:F3} effective={effective:F3} " +
-                    $"distance={distance:F2}m tiles={tiles:F1} offset={offset:F3}");
-            }
         }
 
         private void OnDestroy()

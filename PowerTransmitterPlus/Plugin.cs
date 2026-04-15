@@ -68,8 +68,8 @@ namespace PowerTransmitterPlus
                 "(Client-side) Distance in world meters between one bright pulse and the next. Same physical spacing on 5m beams and 200m beams.");
 
             ScrollSpeed = Config.Bind(
-                "Pulse", "Scroll Speed", 6.0f,
-                "(Client-side) Pulse scroll speed in world meters per second at full power. Half power = half speed.");
+                "Pulse", "Scroll Speed", 25.0f,
+                "(Client-side) Pulse scroll speed in world meters per second at full power (5 kW delivered). Scales with sqrt(intensity), so a 1 kW load runs at about 45% of this, and draws above 5 kW (possible with the distance-cost model) exceed it.");
 
             StripeTroughBrightness = Config.Bind(
                 "Pulse", "Trough Brightness", 0.5f,
