@@ -14,10 +14,12 @@ namespace PowerTransmitterPlus
         internal const ushort SourceDrawValue = 6571;
         internal const ushort DestinationDrawValue = 6572;
         internal const ushort TransmissionLossValue = 6573;
+        internal const ushort EfficiencyValue = 6574;
 
         internal static readonly LogicType MicrowaveSourceDraw = (LogicType)SourceDrawValue;
         internal static readonly LogicType MicrowaveDestinationDraw = (LogicType)DestinationDrawValue;
         internal static readonly LogicType MicrowaveTransmissionLoss = (LogicType)TransmissionLossValue;
+        internal static readonly LogicType MicrowaveEfficiency = (LogicType)EfficiencyValue;
 
         internal class CustomLogicType
         {
@@ -48,6 +50,12 @@ namespace PowerTransmitterPlus
                 Name = "MicrowaveTransmissionLoss",
                 Value = TransmissionLossValue,
                 Description = "Watts lost to distance overhead. Equals MicrowaveSourceDraw minus MicrowaveDestinationDraw. Zero when the link is at zero distance (or when k=0).",
+            },
+            new CustomLogicType
+            {
+                Name = "MicrowaveEfficiency",
+                Value = EfficiencyValue,
+                Description = "Ratio of delivered power to source draw, 0..1. Equals 1/(1 + k * distance_km). 1.0 at zero distance or k=0; drops toward 0 as distance grows. Returns 0 when no transmission is happening.",
             },
         };
 

@@ -29,6 +29,16 @@ namespace PowerTransmitterPlus
         internal static float GetDestinationDraw(PowerTransmitter t) => GetDelivered(t);
         internal static float GetTransmissionLoss(PowerTransmitter t) => GetDelivered(t) * (GetMultiplier(t) - 1f);
 
+        // Returns 0 when no transmission is happening (matches the sibling
+        // readouts' snap-to-zero convention). Otherwise 1 / multiplier, which
+        // is purely a function of distance and k.
+        internal static float GetEfficiency(PowerTransmitter t)
+        {
+            if (GetDelivered(t) <= 0f) return 0f;
+            var m = GetMultiplier(t);
+            return m > 0f ? 1f / m : 0f;
+        }
+
         private static float GetDelivered(PowerTransmitter t)
         {
             if (t == null || !t.OnOff || t.Error == 1) return 0f;
@@ -90,6 +100,9 @@ namespace PowerTransmitterPlus
                     return false;
                 case LogicTypeRegistry.TransmissionLossValue:
                     __result = LogicReadoutCompute.GetTransmissionLoss(t);
+                    return false;
+                case LogicTypeRegistry.EfficiencyValue:
+                    __result = LogicReadoutCompute.GetEfficiency(t);
                     return false;
                 default:
                     return true;
