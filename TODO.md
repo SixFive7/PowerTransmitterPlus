@@ -14,4 +14,4 @@ Steps:
 6. Confirm the client's tablet readouts shift within a second or two without requiring a rejoin.
 7. Also verify new clients joining mid-session immediately receive the host's `k` value (this is handled by the `NetworkManager.PlayerConnected` Harmony postfix → `BroadcastIfHost`).
 
-Reference: plan.md §10 for the sync protocol, §15 step 2.
+Reference: `RESEARCH.md` §9 for the sync protocol.
