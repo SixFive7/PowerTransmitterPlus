@@ -35,7 +35,7 @@ namespace PowerTransmitterPlus
                 for (int i = 0; i < width; i++)
                 {
                     float t = i / (float)width;
-                    // 0.5 + 0.5*cos(2πt) = 1 at t=0, 0 at t=0.5, 1 at t=1
+                    // 0.5 + 0.5*cos(2*pi*t) = 1 at t=0, 0 at t=0.5, 1 at t=1
                     float wave = 0.5f + 0.5f * Mathf.Cos(t * 2f * Mathf.PI);
                     float b = Mathf.Lerp(trough, 1f, wave);
                     tex.SetPixel(i, 0, new Color(b, b, b, 1f));

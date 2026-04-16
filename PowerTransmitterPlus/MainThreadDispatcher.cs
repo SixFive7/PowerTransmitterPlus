@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace PowerTransmitterPlus
 {
-    // Stationeers drives power-tick code (PowerTick.ApplyState → ReceivePower →
+    // Stationeers drives power-tick code (PowerTick.ApplyState -> ReceivePower ->
     // VisualizerIntensity setter) on a ThreadPool worker via UniTask's
     // SwitchToThreadPoolAwaitable. Our Harmony postfixes inherit that thread,
     // so any call to a Unity API (new GameObject, Shader.Find, Transform.position,
