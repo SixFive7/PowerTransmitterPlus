@@ -6,7 +6,7 @@
   <Version>1.0.0</Version>
   <Description>[h1]Power Transmitter Plus[/h1]
 
-A Stationeers mod that gives the Microwave Power Transmitter a visible laser beam with scrolling energy pulses, replaces the vanilla distance-based capacity derate with a configurable source-draw overhead, and exposes four new logic readouts for in-game and IC10 access.
+A Stationeers mod that gives the Microwave Power Transmitter a visible laser beam with scrolling energy pulses, replaces the vanilla distance-based capacity derate with a configurable source-draw overhead, adds IC10-driven auto-aim, and exposes four new logic readouts.
 
 [h2]Features[/h2]
 
@@ -36,6 +36,9 @@ Four new logic types are available on both the transmitter and the receiver, rea
 [*][b]MicrowaveEfficiency[/b] (6574): delivered / source as a 0..1 ratio
 [/list]
 All four return 0 when the link is down, the device is off, or no power is flowing.
+
+[h3]Auto-Aim[/h3]
+A writable logic type [b]MicrowaveAutoAimTarget[/b] (6575) on both transmitter and receiver. Write a Thing's ReferenceId and the dish slews to point at it via the built-in servo; the base game's link raycast decides when the pairing actually forms, so obstacles in the path still take priority. Writing 0 disables. Manually adjusting Horizontal or Vertical cancels auto-aim. This enables IC10 patterns like switching transmit target when remote batteries fill.
 
 [h3]Settings[/h3]
 
@@ -89,7 +92,8 @@ v1.0.0: Initial release
 - Scrolling energy pulses along the beam, speed proportional to power throughput
 - Replaces vanilla distance-based capacity derate with a configurable source-draw overhead (k factor, server-authoritative)
 - Adds MicrowaveSourceDraw / MicrowaveDestinationDraw / MicrowaveTransmissionLoss / MicrowaveEfficiency logic readouts on both transmitter and receiver (LogicType values 6571-6574)
-- IC10 name resolution for the four new readouts
+- Writable MicrowaveAutoAimTarget (6575): IC10 can aim the dish at any Thing by ReferenceId
+- IC10 name resolution for all five new LogicTypes
 - Full multiplayer support with server-authoritative simulation and live config broadcast
   </ChangeLog>
   <Tags>
@@ -108,6 +112,7 @@ Visible beam, scrolling pulses, configurable distance cost, and four new logic r
 - Scrolling energy pulses, speed scales with power throughput
 - Replaces vanilla distance derate with a source-draw overhead (1 + k * distance_km watts drawn per watt delivered). Default k = 5. No more 500m hard cap.
 - Four new logic readouts (tablet + IC10): MicrowaveSourceDraw (6571), MicrowaveDestinationDraw (6572), MicrowaveTransmissionLoss (6573), MicrowaveEfficiency (6574)
+- Writable MicrowaveAutoAimTarget (6575): write a Thing's ReferenceId to auto-aim the dish; write 0 to disable
 - Full multiplayer support with server-authoritative simulation
 
 <b>Settings:</b>

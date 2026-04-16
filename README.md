@@ -2,7 +2,7 @@
 
 ![Power Transmitter Plus](PowerTransmitterPlus/About/Preview.png)
 
-A Stationeers mod that gives the Microwave Power Transmitter a visible laser beam with scrolling energy pulses, replaces the vanilla distance-based capacity derate with a configurable source-draw overhead, and exposes four new logic readouts for in-game and IC10 access.
+A Stationeers mod that gives the Microwave Power Transmitter a visible laser beam with scrolling energy pulses, replaces the vanilla distance-based capacity derate with a configurable source-draw overhead, adds IC10-driven auto-aim, and exposes four new logic readouts.
 
 > **WARNING:** This is a StationeersLaunchPad mod. It requires [BepInEx](https://docs.bepinex.dev/) and [StationeersLaunchPad](https://github.com/StationeersLaunchPad/StationeersLaunchPad) to be installed.
 
@@ -43,6 +43,32 @@ Four new logic types are available on both the transmitter and the receiver, rea
 | `MicrowaveEfficiency` | 6574 | delivered / source as a 0..1 ratio |
 
 All four return 0 when the link is down, the device is off, or no power is flowing.
+
+### Auto-Aim
+A fifth logic type, `MicrowaveAutoAimTarget` (value 6575), is **writable** on both transmitter and receiver. Write a Thing's `ReferenceId` and the dish slews to point at it via the built-in servo; the base game's line-of-sight link raycast decides when the actual pairing forms, so obstacles in the path still take priority like in vanilla.
+
+| Name | Value | Behavior |
+|---|---:|---|
+| `MicrowaveAutoAimTarget` | 6575 | Write: target's ReferenceId (0 disables). Read: current target id |
+
+Auto-aim is per-dish and one-sided: setting the target on a transmitter does not touch its receiver, and vice versa. Manually adjusting `Horizontal` or `Vertical` (player, tablet, or IC10 `s d0 Horizontal ...`) cancels auto-aim. Writing 0 disables without moving the dish. Writing an unresolved id is a no-op. This enables logic like switching the transmit target when remote batteries fill up:
+
+```
+define self_ref 12345     # this transmitter's ReferenceId
+define batt_a  67890      # receiver A's ReferenceId
+define batt_b  67891      # receiver B's ReferenceId
+
+loop:
+l r0 d0 Setting           # current charge ratio read from some sensor
+blt r0 0.99 aim_a
+s d0 MicrowaveAutoAimTarget batt_b
+j wait
+aim_a:
+s d0 MicrowaveAutoAimTarget batt_a
+wait:
+yield
+j loop
+```
 
 Example IC10 reading a single named transmitter on the data network:
 
