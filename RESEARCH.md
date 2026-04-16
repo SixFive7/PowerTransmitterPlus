@@ -65,7 +65,7 @@ Auto-aim rides entirely on pre-existing infrastructure: `SetLogicValue` is serve
 | Power-flow simulation | `DistanceCostPatches.cs` | 4 patches replacing vanilla distance derate with source-draw multiplier |
 | Logic readout (UI/IC10) | `LogicReadoutPatches.cs` | `CanLogicRead` postfix + `GetLogicValue` prefix on `WirelessPower` (base class); branches on instance type inside |
 | Auto-aim logic write | `AutoAimPatches.cs` | `SetLogicValue` prefix intercepts `MicrowaveAutoAimTarget`; `RotatableBehaviour` target setter postfixes clear the cache on manual override. Per-dish cache via `ConditionalWeakTable` |
-| Logic system bootstrap | `Ic10ConstantsPatcher.cs`, `LogicableInitializePatch.cs`, `EnumNamePatches.cs`, `StationpediaPatches.cs` | Teach the game about our `LogicType` values 6571-6575 everywhere the game looks them up by name |
+| Logic system bootstrap | `Ic10ConstantsPatcher.cs`, `LogicableInitializePatch.cs`, `EnumNamePatches.cs`, `StationpediaPatches.cs` | Teach the game about our `LogicType` values 6571-6576 everywhere the game looks them up by name: compiler constants, tablet arrays, enum name resolution, screen syntax highlighting, Stationpedia |
 | Multiplayer sync (k) | `DistanceConfigMessage.cs`, `DistanceConfigSync.cs` | Server-authoritative `k` push to clients via LPB networking |
 | Multiplayer sync (visuals) | `BeamVisualConfigMessage.cs`, `BeamVisualConfigSync.cs` | Server-authoritative beam visual config push to clients via LPB networking |
 | Foundation | `Plugin.cs`, `MainThreadDispatcher.cs`, `LogicTypeRegistry.cs`, `BeamManager.cs`, `BeamLine.cs`, `BeamPulseTrain.cs` | Wiring, registry, beam GameObjects |
@@ -161,7 +161,10 @@ Static sync manager mirroring the `DistanceConfigSync` pattern. Stores host-push
 
 ### `Ic10ConstantsPatcher.cs`
 
-Static `Apply()`. One-time reflection injection into `ProgrammableChip.AllConstants` (a `public static ProgrammableChip.Constant[]`). Merges our entries into the array. The MIPS compiler resolves any name token against this array via `OrdinalIgnoreCase` string comparison.
+Static `Apply()`. Two jobs:
+
+1. One-time reflection injection into `ProgrammableChip.AllConstants` (a `public static ProgrammableChip.Constant[]`). Merges our entries into the array. The MIPS compiler resolves any name token against this array via `OrdinalIgnoreCase` string comparison.
+2. `ExtendSyntaxHighlighting()`: extends `ProgrammableChip.InternalEnums` entries for `ScriptEnum<LogicType>` (bare names like `MicrowaveSourceDraw`, colored orange) and `BasicEnum<LogicType>` (dotted names like `LogicType.MicrowaveSourceDraw`, colored teal). Both classes snapshot `Enum.GetValues`/`GetNames` at construction into private readonly `_types`/`_names` arrays. Our custom values are not in the real enum, so without this extension they receive no `<color>` tag and inherit the screen's default red text color. See §5.7.
 
 Idempotent guard: `_applied` bool.
 
@@ -171,9 +174,9 @@ Postfix on `Logicable.Initialize`. Two steps:
 
 1. Appends to `Logicable.LogicTypes` (`LogicType[]`) and `Logicable.LogicTypeNames` (`string[]`) via reflection. Rebuilds `LogicTypeNamesRedirects` if present.
 2. Calls `ExtendEnumCollection(...)` which reflects into `EnumCollections.LogicTypes` and extends `Values`, `ValuesAsInts`, `Names`, `PaddedNames`, and the `<Length>k__BackingField`.
-3. Calls `ExtendScreenDropdownBase(...)` which reflects into `ScreenDropdownBase.LogicTypes` and `LogicTypeNames` to add custom entries.
+3. Calls `ExtendScreenDropdownBase(...)` which reflects into `ScreenDropdownBase.LogicTypes` and `LogicTypeNames` to add custom entries to the motherboard condition/action dropdown UI.
 
-All three steps are required: step 1 drives `Logicable.NextLogicType` cycling; step 2 drives the configuration tablet cartridge UI; step 3 drives the on-screen IC10 code preview syntax highlighting on computers and laptops. See §8.12.
+Steps 1 and 2 are required: step 1 drives `Logicable.NextLogicType` cycling; step 2 drives the configuration tablet cartridge UI. Step 3 extends the motherboard screen dropdowns. See §8.12.
 
 Idempotent guard: `_injected` bool.
 
@@ -415,11 +418,50 @@ The game keeps **three separate arrays of logic types**:
 2. `Assets.Scripts.EnumCollections.LogicTypes`: the `EnumCollection<LogicType, ushort>` consumed by `ConfigCartridge` (configuration tablet cartridge).
 3. `Assets.Scripts.UI.Motherboard.ScreenDropdownBase.LogicTypes` / `LogicTypeNames`: IC housing on-screen dropdowns.
 
-All three are populated from `Enum.GetValues(typeof(LogicType))` at class load. Extending only `Logicable`'s pair is not enough: the configuration tablet is driven by `EnumCollections.LogicTypes`, and the on-screen code preview (rendered on the computer/laptop when the editor is closed) validates token names against `ScreenDropdownBase.LogicTypes`. This mod extends all three.
+All three are populated from `Enum.GetValues(typeof(LogicType))` at class load. Extending only `Logicable`'s pair is not enough: the configuration tablet is driven by `EnumCollections.LogicTypes`. `ScreenDropdownBase` drives the motherboard condition/action dropdown UI. This mod extends all three.
 
 `EnumCollection<T1, T2>` lives in `Assets.Scripts`, NOT `Assets.Scripts.Util`. `ProgrammableChip` lives in `Assets.Scripts.Objects.Electrical`, NOT `Motherboards`; `ProgrammableChip.Constant` is a nested `public readonly struct`.
 
 The MIPS compiler resolves name tokens against `ProgrammableChip.AllConstants` directly: verified in-game for both `l r0 d0 MicrowaveSourceDraw` and `lbn ... MicrowaveSourceDraw 0`. The `Hash` field on `Constant` is for the `#hash` MIPS directive, not pure name lookups.
+
+### 5.7. IC10 screen syntax highlighting pipeline (decompiled)
+
+All IC10 code rendered on in-game screens (wall-mounted computers, laptops, tablets) flows through a single pipeline. There are no separate code paths per screen type.
+
+```
+ProgrammableChipMotherboard.SetSourceCode(string)
+  -> Localization.ParseDefines()          // collect alias/define names and jump labels
+  -> Localization.ParseScript()           // produce colored rich text
+       -> ParseScriptLine() per line
+            -> ReplaceCommands()          // main token coloring
+                 for each entry in ProgrammableChip.InternalEnums:
+                   entry.Parse(ref masterString)
+            -> ReplaceNumbers()
+            -> ReplaceDeviceReferences()
+```
+
+`ProgrammableChip.InternalEnums` is a `public static List<IScriptEnum>` populated in the static constructor. The LogicType-relevant entries:
+
+| Index | Type | Color | What it highlights |
+|---|---|---|---|
+| 0 | `ScriptEnum<LogicType>` | orange | Bare names: `MicrowaveSourceDraw`, `Temperature`, etc. |
+| 4 | `BasicEnum<LogicType>` | `#20B2AA` (teal) | Dotted names: `LogicType.MicrowaveSourceDraw`, `LogicType.Temperature` |
+
+Both classes snapshot `Enum.GetValues(typeof(LogicType))` / `Enum.GetNames(typeof(LogicType))` into private readonly `_types` (`T[]`) and `_names` (`string[]`) arrays at construction time. `Parse()` iterates these arrays and wraps each matching whole word with `<color=X>`:
+
+```csharp
+// ScriptEnum<T>.Parse (simplified)
+for (int i = 0; i < _types.Length; i++)
+    masterString = masterString.ReplaceWholeWord(
+        _names[i],
+        string.Format("<color={1}>{0}</color>", _names[i], _color));
+```
+
+Tokens that match no entry in any `IScriptEnum` receive no `<color>` tag and inherit the screen prefab's default `Text` component color, which is red. This is why unrecognized LogicType names appear red on the screen preview even though they compile and execute correctly.
+
+`BasicEnum<LogicType>` prefixes each name with its type string plus a dot during construction: `_names[i] = "LogicType." + _names[i]`. When extending its arrays, the same prefix must be applied.
+
+Since the arrays are captured at static init (before any mod runs), extending them requires reflection writes to the readonly fields on the existing instances in `InternalEnums`. This is done by `Ic10ConstantsPatcher.ExtendSyntaxHighlighting()`.
 
 ---
 
@@ -504,7 +546,7 @@ Energy conservation: `_powerProvided` net-zeros each tick.
 
 ### 6.5. Non-Harmony reflection injection
 
-- `Ic10ConstantsPatcher.Apply()`: called from `Plugin.OnAllModsLoaded` after `PatchAll`. Reflects into `ProgrammableChip.AllConstants` (a `public static ProgrammableChip.Constant[]`) and assigns a new merged array. Idempotent.
+- `Ic10ConstantsPatcher.Apply()`: called from `Plugin.OnAllModsLoaded` after `PatchAll`. Reflects into `ProgrammableChip.AllConstants` (a `public static ProgrammableChip.Constant[]`) and assigns a new merged array. Then calls `ExtendSyntaxHighlighting()` which finds `ScriptEnum<LogicType>` (index 0) and `BasicEnum<LogicType>` (index 4) in `ProgrammableChip.InternalEnums` and extends their private `_types`/`_names` arrays so custom LogicType names get colored on in-game screens. Idempotent.
 - `AutoAimState.ParentRotatableField`: one-shot `AccessTools.Field(typeof(RotatableBehaviour), "_parentRotatable")` used by the reset postfixes to map a `RotatableBehaviour` back to its owning `WirelessPower`.
 
 ---
@@ -618,13 +660,14 @@ Network serialization quantizes floats to half-precision. `0.2` is not exactly r
 
 **Rule**: use `dish.transform.position` (the placement-anchored root) as both origin and target for aim computation. Invariant under all dish rotation.
 
-### 8.12. There are three separate `LogicTypes` arrays
+### 8.12. There are four separate LogicType registries
 
-See §5.6. The game keeps three independent copies populated from `Enum.GetValues` at class load. All three must be extended:
+The game stores LogicType names/values in four independent locations, each populated from `Enum.GetValues`/`GetNames` at class load. All four must be extended for full coverage:
 
 1. `Logicable.LogicTypes` / `LogicTypeNames`: drives `NextLogicType` cycling in the tablet.
 2. `EnumCollections.LogicTypes`: drives `ConfigCartridge` (tablet cartridge UI).
-3. `ScreenDropdownBase.LogicTypes` / `LogicTypeNames`: drives the on-screen IC10 code preview rendered on computers and laptops. If not extended, custom LogicType names appear red (invalid) in the code preview even though compilation and execution work fine.
+3. `ScreenDropdownBase.LogicTypes` / `LogicTypeNames`: drives motherboard condition/action dropdown menus.
+4. `ProgrammableChip.InternalEnums` entries `ScriptEnum<LogicType>` and `BasicEnum<LogicType>`: drive **syntax highlighting** on all in-game screens (computers, laptops, wall-mounted screens). If not extended, custom LogicType names receive no `<color>` tag and inherit the screen's default red text color, appearing "invalid" even though they compile and execute correctly. See §5.7.
 
 ---
 
