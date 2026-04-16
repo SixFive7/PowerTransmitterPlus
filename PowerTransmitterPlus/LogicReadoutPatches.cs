@@ -93,6 +93,19 @@ namespace PowerTransmitterPlus
                 return false;
             }
 
+            // LinkedPartner is also per-dish: TX returns its receiver's id,
+            // RX returns its transmitter's id.
+            if ((ushort)logicType == LogicTypeRegistry.LinkedPartnerValue)
+            {
+                if (__instance is PowerTransmitter tx)
+                    __result = tx.LinkedReceiver != null ? (double)tx.LinkedReceiver.ReferenceId : 0.0;
+                else if (__instance is PowerReceiver rx)
+                    __result = rx.LinkedPowerTransmitter != null ? (double)rx.LinkedPowerTransmitter.ReferenceId : 0.0;
+                else
+                    __result = 0.0;
+                return false;
+            }
+
             PowerTransmitter t = null;
             if (__instance is PowerTransmitter transmitter) t = transmitter;
             else if (__instance is PowerReceiver receiver) t = receiver.LinkedPowerTransmitter;

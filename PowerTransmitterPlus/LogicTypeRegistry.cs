@@ -16,12 +16,14 @@ namespace PowerTransmitterPlus
         internal const ushort TransmissionLossValue = 6573;
         internal const ushort EfficiencyValue = 6574;
         internal const ushort AutoAimTargetValue = 6575;
+        internal const ushort LinkedPartnerValue = 6576;
 
         internal static readonly LogicType MicrowaveSourceDraw = (LogicType)SourceDrawValue;
         internal static readonly LogicType MicrowaveDestinationDraw = (LogicType)DestinationDrawValue;
         internal static readonly LogicType MicrowaveTransmissionLoss = (LogicType)TransmissionLossValue;
         internal static readonly LogicType MicrowaveEfficiency = (LogicType)EfficiencyValue;
         internal static readonly LogicType MicrowaveAutoAimTarget = (LogicType)AutoAimTargetValue;
+        internal static readonly LogicType MicrowaveLinkedPartner = (LogicType)LinkedPartnerValue;
 
         internal class CustomLogicType
         {
@@ -64,6 +66,12 @@ namespace PowerTransmitterPlus
                 Name = "MicrowaveAutoAimTarget",
                 Value = AutoAimTargetValue,
                 Description = "Writable. Set to a Thing's ReferenceId to aim the dish at that thing; the dish slews via its built-in servo and the base-game line-of-sight link raycast decides when the pairing actually forms. Set to 0 to disable auto-aim. Writing an invalid or unresolved id is a no-op. Manually adjusting Horizontal or Vertical cancels auto-aim. Reading returns the current target id, or 0 when auto-aim is disabled.",
+            },
+            new CustomLogicType
+            {
+                Name = "MicrowaveLinkedPartner",
+                Value = LinkedPartnerValue,
+                Description = "Read-only. Returns the ReferenceId of the currently linked partner dish: on a transmitter this is the linked receiver, on a receiver this is the linked transmitter. Returns 0 when unlinked.",
             },
         };
 
