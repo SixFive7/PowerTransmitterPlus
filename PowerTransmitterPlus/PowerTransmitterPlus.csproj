@@ -80,6 +80,8 @@
     <Compile Include="EnumNamePatches.cs" />
     <Compile Include="LogicReadoutPatches.cs" />
     <Compile Include="AutoAimPatches.cs" />
+    <Compile Include="BeamVisualConfigMessage.cs" />
+    <Compile Include="BeamVisualConfigSync.cs" />
     <Compile Include="StationpediaPatches.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>

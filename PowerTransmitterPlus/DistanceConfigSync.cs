@@ -76,6 +76,7 @@ namespace PowerTransmitterPlus
         public static void Postfix()
         {
             DistanceConfigSync.BroadcastIfHost();
+            BeamVisualConfigSync.BroadcastIfHost();
         }
     }
 }

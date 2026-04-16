@@ -63,22 +63,38 @@ namespace PowerTransmitterPlus
             }
         }
 
-        // Beam RGB at full intensity. Alpha is driven separately by SetLineIntensity
-        // to mirror the vanilla SetMaterialPropertiesForIntensity behavior.
+        // Beam RGB at full intensity. Uses effective values (synced from host
+        // when Enforce Visual Sync is on, local config otherwise).
         internal static Color BeamColor
         {
             get
             {
-                var hex = PowerTransmitterPlusPlugin.BeamColorHex?.Value ?? "000DFF";
+                var hex = BeamVisualConfigSync.GetEffectiveBeamColorHex();
                 if (!ColorUtility.TryParseHtmlString("#" + hex, out var c)) c = new Color(0f, 0.049f, 1f, 1f);
 
-                var boost = PowerTransmitterPlusPlugin.EmissionIntensity?.Value ?? 1f;
+                var boost = BeamVisualConfigSync.GetEffectiveEmissionIntensity();
                 if (boost > 0f && boost != 1f)
                 {
                     c = new Color(c.r * boost, c.g * boost, c.b * boost, c.a);
                 }
                 return c;
             }
+        }
+
+        // Force all existing beams to be destroyed so they're recreated with
+        // current visual settings on the next SetLineIntensity call.
+        internal static void InvalidateAllBeams()
+        {
+            MainThreadDispatcher.Enqueue(InvalidateAllBeamsOnMain);
+        }
+
+        private static void InvalidateAllBeamsOnMain()
+        {
+            foreach (var beam in Beams.Values)
+            {
+                if (beam != null && !beam.IsDestroyed) beam.Destroy();
+            }
+            Beams.Clear();
         }
 
         // Primary signal. VisualizerIntensity (0..1) drives both on/off and

@@ -45,8 +45,8 @@ namespace PowerTransmitterPlus
             var distance = Vector3.Distance(a, b);
             if (distance < 0.001f) return;
 
-            var wavelength = Mathf.Max(0.05f, PowerTransmitterPlusPlugin.StripeWavelength?.Value ?? 2f);
-            var scrollMps = PowerTransmitterPlusPlugin.ScrollSpeed?.Value ?? 6f;
+            var wavelength = Mathf.Max(0.05f, BeamVisualConfigSync.GetEffectiveStripeWavelength());
+            var scrollMps = BeamVisualConfigSync.GetEffectiveScrollSpeed();
 
             // Non-linear intensity ramp (sqrt) so even a tiny power draw
             // produces visible motion — the game's VisualizerIntensity often

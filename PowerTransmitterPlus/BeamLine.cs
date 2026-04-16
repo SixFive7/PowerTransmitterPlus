@@ -39,7 +39,7 @@ namespace PowerTransmitterPlus
             _lineRenderer.startColor = color;
             _lineRenderer.endColor = color;
 
-            var width = PowerTransmitterPlusPlugin.BeamWidth?.Value ?? 0.1f;
+            var width = BeamVisualConfigSync.GetEffectiveBeamWidth();
             if (width <= 0f) width = 0.1f;
             _lineRenderer.startWidth = width;
             _lineRenderer.endWidth = width;
@@ -68,6 +68,12 @@ namespace PowerTransmitterPlus
             IsVisible = false;
             if (IsDestroyed) return;
             _lineRenderer.enabled = false;
+        }
+
+        public void Destroy()
+        {
+            IsVisible = false;
+            if (_gameObject != null) Object.Destroy(_gameObject);
         }
 
         // Forwards the game's power-level intensity (0..1) to the pulse train,

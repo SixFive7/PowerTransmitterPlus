@@ -14,7 +14,7 @@ namespace PowerTransmitterPlus
     {
         public const string PluginGuid = "net.powertransmitterplus";
         public const string PluginName = "PowerTransmitterPlus";
-        public const string PluginVersion = "1.0.0";
+        public const string PluginVersion = "1.1.0";
 
         internal static readonly Mod MOD = new Mod(PluginName, PluginVersion);
         internal static ManualLogSource Log;
@@ -42,6 +42,7 @@ namespace PowerTransmitterPlus
         // a source-draw multiplier. See DistanceCostPatches for the math + the
         // four Harmony patches that implement it. Server-authoritative.
         internal static ConfigEntry<float> DistanceCostFactor;
+
 
         void Awake()
         {
@@ -81,6 +82,7 @@ namespace PowerTransmitterPlus
 
             MainThreadDispatcher.Init();
             DistanceConfigSync.HookHostBroadcast();
+            BeamVisualConfigSync.HookHostBroadcast();
 
             Prefab.OnPrefabsLoaded += OnAllModsLoaded;
         }
@@ -93,6 +95,7 @@ namespace PowerTransmitterPlus
             {
                 MOD.Networking.Required = true;
                 MOD.Networking.RegisterMessage<DistanceConfigMessage>();
+                MOD.Networking.RegisterMessage<BeamVisualConfigMessage>();
 
                 var harmony = new Harmony(PluginGuid);
                 harmony.PatchAll();
