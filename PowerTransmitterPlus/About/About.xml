@@ -6,7 +6,7 @@
   <Version>1.1.3</Version>
   <Description>[h1]Power Transmitter Plus[/h1]
 
-A Stationeers mod that gives the Microwave Power Transmitter a visible laser beam with scrolling energy pulses, replaces the vanilla distance-based capacity derate with a configurable source-draw overhead, adds IC10-driven auto-aim, and exposes new logic readouts including link-partner detection.
+Adds a visible beam, scrolling pulses, a configurable distance cost, and new logic readouts to the Microwave Power Transmitter.
 
 [h2]Features[/h2]
 
@@ -119,7 +119,7 @@ v1.0.0: Initial release
     <Tag>StationeersPlus</Tag>
   </Tags>
   <InGameDescription><![CDATA[<size="30"><color=#00aaff>Power Transmitter Plus</color></size>
-Visible beam, scrolling pulses, configurable distance cost, and five new logic readouts for the Microwave Power Transmitter.
+Adds a visible beam, scrolling pulses, a configurable distance cost, and new logic readouts to the Microwave Power Transmitter.
 
 <b>Features:</b>
 - Visible laser beam between linked transmitter and receiver dishes
