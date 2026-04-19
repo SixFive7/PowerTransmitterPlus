@@ -124,6 +124,10 @@ In multiplayer, the host's beam visual settings (width, color, emission intensit
 
 If you run into a bug or something behaves unexpectedly, please open an issue on [GitHub](https://github.com/SixFive7/PowerTransmitterPlus/issues). It would be greatly appreciated. Steam comment notifications don't always come through, so GitHub is the reliable way to make sure a report is seen.
 
+## Changelog
+
+Version history lives in [`PowerTransmitterPlus/About/About.xml`](PowerTransmitterPlus/About/About.xml) under `<ChangeLog>` and is published on the [Steam Workshop Change Notes tab](https://steamcommunity.com/sharedfiles/filedetails/changelog/3707677512) with every release.
+
 ## Credits
 
 - **ThunderDuck**: Created [Stationeers Logic Extended](https://steamcommunity.com/sharedfiles/filedetails/?id=3625190467), which pioneered the pattern for registering custom LogicType values. The injection approach used here (extending `ProgrammableChip.AllConstants`, `Logicable.LogicTypes`, and the enum-name lookup paths) is adapted from that work.
