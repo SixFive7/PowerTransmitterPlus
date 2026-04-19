@@ -1,4 +1,4 @@
-# Power Transmitter Plus [StationeersLaunchPad]
+# Power Transmitter Plus
 
 ![Power Transmitter Plus](PowerTransmitterPlus/About/Preview.png)
 
